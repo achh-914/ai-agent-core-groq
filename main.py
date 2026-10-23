@@ -1,41 +1,35 @@
 import os
 from groq import Groq
-from config import GROQ_API_KEY
-from tools import get_system_status
 
-# Initialize Groq Client securely
-client = Groq(api_key=GROQ_API_KEY or os.environ.get("GROQ_API_KEY"))
+try:
+    from config import GROQ_API_KEY
+except ImportError:
+    GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
-def run_agent(prompt: str):
-    """
-    Executes the AI Agent with the given user prompt.
-    """
-    print(f"[Input]: {prompt}")
-    
-    # Example tool integration check
-    if "system" in prompt.lower() or "status" in prompt.lower():
-        system_info = get_system_status()
-        prompt = f"{prompt}\n\n[Context Data]: {system_info}"
+client = Groq(api_key=GROQ_API_KEY)
 
-    response = client.chat.completions.create(
-        model="llama3-8b-8192",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a helpful and intelligent AI Assistant."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
-    )
-    
-    output = response.choices[0].message.content
-    print(f"[Output]: {output}")
-    return output
+def chat_loop():
+    print("--- 🤖 AI Agent Started (Type 'exit' to quit) ---")
+    messages = [
+        {"role": "system", "content": "You are a helpful and intelligent AI Assistant."}
+    ]
+
+    while True:
+        user_input = input("\nYou: ")
+        if user_input.lower() in ["exit", "quit"]:
+            print("Goodbye!")
+            break
+
+        messages.append({"role": "user", "content": user_input})
+
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-20b",
+            messages=messages
+        )
+
+        reply = response.choices[0].message.content
+        print(f"\nAI: {reply}")
+        messages.append({"role": "assistant", "content": reply})
 
 if __name__ == "__main__":
-    print("--- Starting AI Agent ---")
-    user_query = "Check system status and give me a quick summary."
-    run_agent(user_query)
+    chat_loop()
