@@ -6,8 +6,7 @@ __pycache__/
 # Environment variables
 .env
 
-# Terraform build files & providers
+# Terraform build files
 .terraform/
 *.tfstate
 *.tfstate.backup
-.terraform.lock.hcl
