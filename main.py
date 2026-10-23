@@ -1,17 +1,18 @@
 import os
 from groq import Groq
+from config import GROQ_API_KEY, DEFAULT_MODEL
+from tools import get_system_status, calculate_expression
 
-try:
-    from config import GROQ_API_KEY
-except ImportError:
-    GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-
-client = Groq(api_key=GROQ_API_KEY)
+api_key = GROQ_API_KEY or os.environ.get("GROQ_API_KEY")
+client = Groq(api_key=api_key)
 
 def chat_loop():
     print("--- 🤖 AI Agent Started (Type 'exit' to quit) ---")
     messages = [
-        {"role": "system", "content": "You are a helpful and intelligent AI Assistant."}
+        {
+            "role": "system",
+            "content": "You are an intelligent AI Agent. You can provide system status or perform math calculations when asked."
+        }
     ]
 
     while True:
@@ -20,10 +21,15 @@ def chat_loop():
             print("Goodbye!")
             break
 
+        if "status" in user_input.lower():
+            status = get_system_status()
+            print(f"\n[Tool Execution]: {status}")
+            user_input += f"\n[System Data]: {status}"
+
         messages.append({"role": "user", "content": user_input})
 
         response = client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model=DEFAULT_MODEL,
             messages=messages
         )
 

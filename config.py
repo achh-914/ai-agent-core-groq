@@ -1,1 +1,7 @@
-GROQ_API_KEY = "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"
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+DEFAULT_MODEL = "openai/gpt-oss-20b"
