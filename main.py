@@ -89,7 +89,7 @@ def chat_loop():
             # L'chef tlb adat -> kan-nfdhoha
             for call in msg.tool_calls:
                 args = json.loads(call.function.arguments or "{}")
-                print(f"🔧 Agent khtar: {call.function.name}({args})")
+                print(f"🔧 Agent chose: {call.function.name}({args})")
                 result = AVAILABLE[call.function.name](**args)
                 messages.append(
                     {
