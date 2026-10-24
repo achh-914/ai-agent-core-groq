@@ -1,7 +1,7 @@
 import json
 from groq import Groq
 from config import GROQ_API_KEY, DEFAULT_MODEL
-from tools import get_system_status, calculate_expression
+from tools import get_system_status, calculate_expression, get_idle_instances
 
 client = Groq(api_key=GROQ_API_KEY)
 
@@ -27,22 +27,34 @@ TOOLS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_idle_instances",
+            "description": "Get the list of AWS EC2 instances with average CPU and monthly cost",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
 ]
 
 AVAILABLE = {
     "get_system_status": get_system_status,
     "calculate_expression": calculate_expression,
+    "get_idle_instances": get_idle_instances,
 }
 
 SYSTEM_PROMPT = (
     "You are an AI agent running in a terminal. "
     "This is a learning project built by a developer who is learning to build AI agents. "
-    "Your tools are: get_system_status and calculate_expression. "
+    "Your tools are: get_system_status, calculate_expression and get_idle_instances. "
+    "get_idle_instances returns sample AWS EC2 data, it is fake test data, not a real account. "
+    "An instance with average CPU below 5 percent is considered idle. "
+    "You can only recommend actions, you cannot stop or change anything. "
     "You have no memory of past projects or any work outside this conversation. "
     "Never invent experiences or facts about yourself. "
     "If you do not know something, say you do not know. "
     "ALWAYS use the calculator tool for any math, never calculate yourself. "
-    "Reply in plain text only, no markdown, no tables, max 5 lines."
+    "Reply in plain text only, no markdown, no tables, max 6 lines."
 )
 
 
