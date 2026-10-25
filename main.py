@@ -1,7 +1,9 @@
 import json
+import inspect
 from groq import Groq
 from config import GROQ_API_KEY, DEFAULT_MODEL
-from tools import get_system_status, calculate_expression, get_idle_instances
+from tools import get_system_status, calculate_expression
+from aws_tools import get_idle_instances
 
 client = Groq(api_key=GROQ_API_KEY)
 
@@ -47,7 +49,7 @@ SYSTEM_PROMPT = (
     "You are an AI agent running in a terminal. "
     "This is a learning project built by a developer who is learning to build AI agents. "
     "Your tools are: get_system_status, calculate_expression and get_idle_instances. "
-    "get_idle_instances returns sample AWS EC2 data, it is fake test data, not a real account. "
+    "get_idle_instances returns real EC2 instances from a real AWS account, with average CPU over 24 hours. An empty list means no instance is running. A cpu_avg of null means CloudWatch has no data yet. "
     "An instance with average CPU below 5 percent is considered idle. "
     "You can only recommend actions, you cannot stop or change anything. "
     "You have no memory of past projects or any work outside this conversation. "
@@ -90,7 +92,13 @@ def chat_loop():
             for call in msg.tool_calls:
                 args = json.loads(call.function.arguments or "{}")
                 print(f"🔧 Agent chose: {call.function.name}({args})")
-                result = AVAILABLE[call.function.name](**args)
+                function = AVAILABLE[call.function.name]
+                allowed = inspect.signature(function).parameters
+                args = {k: v for k, v in args.items() if k in allowed}
+                try:
+                    result = function(**args)
+                except Exception as error:
+                    result = f"Tool error: {error}"
                 messages.append(
                     {
                         "role": "tool",
