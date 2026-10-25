@@ -1,5 +1,0 @@
-===========================================
-AI Agent Core Infrastructure Setup
-Model: Llama 3 (via Groq API)
-Status: Provisioned successfully
-===========================================
